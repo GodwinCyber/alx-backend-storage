@@ -102,10 +102,22 @@ class Cache:
 
     def replay(method: Callable) -> None:
         """Display the history of calls of a particular function."""
-        cache = Cache()
-        key = method.__qualname__
-        inputs = cache._redis.lrange("{}.inputs".format(key), 0, -1)
-        outputs = cache._redis.lrange("{}.outputs".format(key), 0, -1)
+        if fn is None or not hasattr(fn, '__self__'):
+            return
+        redis_store = getattr(fn.__self__, '_redis', None)
+        if not isinstance(redis_store, redis.Redis):
+            return
+        
+        fxn_name = fn.__qualname__
+        in_key = '{}:inputs'.format(fxn_name)
+        out_key = '{}:outputs'.format(fxn_name)
+        fxn_call_count = 0
+
+        inputs = cache._redis.lrange((in_key), 0, -1)
+        outputs = cache._redis.lrange((out_key), 0, -1)
+
+        if inputs and outputs:
+            fxn_call_count = min(len(inputs), len(outputs))
 
         print("{} was called {} times:".format(key, len(inputs)))
         for input_data, output_data in zip(inputs, outputs):
