@@ -95,3 +95,16 @@ class Cache:
             The retrieve data as an integer or None if it does not exist
         """
         return self.get(key, lambda x: int(x))
+
+    def replay(method: Callable):
+        """Display the history of calls of a particular function."""
+        cache = Cache()
+        key = method.__qualname__
+        inputs = cache._redis.lrange("{}.inputs".format(key), 0, -1)
+        outputs = cache._redis.lrange("{}.outputs".format(key), 0, -1)
+
+        print("{} was called {} times:".format(key, len(inputs)))
+        for input_data, output_data in zip(inputs, outputs):
+            input_data = input_data.decode('utf-8')
+            output_data = output_data.decode('utf-8')
+            print("{}(*{}) -> {}".format(input_data, output_data))
