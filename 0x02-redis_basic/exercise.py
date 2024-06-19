@@ -96,7 +96,7 @@ class Cache:
         """
         return self.get(key, lambda x: int(x))
 
-    def replay(method: Callable):
+    def replay(method: Callable) -> None:
         """Display the history of calls of a particular function."""
         cache = Cache()
         key = method.__qualname__
