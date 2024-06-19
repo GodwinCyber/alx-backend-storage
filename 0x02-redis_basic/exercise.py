@@ -23,6 +23,22 @@ def count_calls(method: Callable) -> Callable:
         return method(self, *args, **kwargs)
     return wrapper
 
+def call_history(method: Callable) -> Callable:
+    """Decorator to store the input and output for a method"""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs) -> Any:
+        """wrapper function that store input and output"""
+        output = method(self, *args, **kwargs)
+        key = method.__qualname__
+        input_key = "{}:inputs".format(key)
+        output_key = "{}:outputs".format(key)
+
+        self._redis.rpush(input_key, str(args))
+        self._redis.rpush(output_key, str(output))
+        return output
+    return wrapper
+
+
 class Cache:
     """Create a Cache class. In the __init__ method, store an
        instance of the Redis client as a private variable named _redis
@@ -34,6 +50,7 @@ class Cache:
         self._redis.flushdb(True)
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """create  store method that take a data argunment and return a string
             the moment you generate random key using uuid, store the input data
