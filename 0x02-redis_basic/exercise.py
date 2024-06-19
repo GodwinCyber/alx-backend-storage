@@ -9,7 +9,7 @@ from functools import wraps
 
 def count_calls(method: Callable) -> Callable:
     """count how many times methods of the Cache class are called.
-        count_calls decorator that takes a single method Callable 
+        count_calls decorator that takes a single method Callable
         argument and returns a Callable.
     """
     @wraps(method)
@@ -22,6 +22,7 @@ def count_calls(method: Callable) -> Callable:
         self._redis.incr(key)
         return method(self, *args, **kwargs)
     return wrapper
+
 
 def call_history(method: Callable) -> Callable:
     """Decorator to store the input and output for a method"""
@@ -60,16 +61,19 @@ class Cache:
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
-    
-    def get(self, key: str, fn: Callable = None) -> Union[str, bytes, int, float, None]:
-        """create get method that takes a key and an optional [Callable] fn argument
-           The Callable will be used to convert data back to the desired format
+
+    def get(self, key: str, fn: Callable = None) -> Union[
+                             str, bytes, int, float, None]:
+        """create get method that takes a key and an
+            optional [Callable] fn argument The Callable
+            will be used to convert data back to the desired format
         Arg:
             key (str): The key to retrieve data from Redis
-            fn (Optional[Callable]): An optional function to convert data back to the desired format
+            fn (Optional[Callable]): An optional function
+            to convert data back to the desired format
         Returns:
-            Union[str, bytes, int, float, None]: The retrieved data or None if the key
-            does not exist in Redis
+            Union[str, bytes, int, float, None]: The retrieved
+            data or None if the key does not exist in Redis
         """
         data = self._redis.get(key)
         if data is None:
