@@ -3,7 +3,7 @@
 
 import redis
 import uuid
-from typing import Union
+from typing import Union, Callable, Optional
 
 
 class Cache:
@@ -25,3 +25,38 @@ class Cache:
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
+    
+    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float, None]:
+        """create get method that takes a key and an optional [Callable] fn argument
+           The Callable will be used to convert data back to the desired format
+        Arg:
+            key (str): The key to retrieve data from Redis
+            fn (Optional[Callable]): An optional function to convert data back to the desired format
+        Returns:
+            Union[str, bytes, int, float, None]: The retrieved data or None if the key
+            does not exist in Redis
+        """
+        data = self._redis.get(key)
+        if data is None:
+            return None
+        if fn:
+            return fn(data)
+        return data
+
+    def get_str(self, key: str) -> Optional[str]:
+        """Retrieve data as a stirng from Redis
+        Arg:
+            key: The key of the data to retrieve
+        Return:
+            The retrieve data as a string or None is data does not exit
+        """
+        return self.get(key, lambda x: x.decode('utf-8'))
+
+    def get_int(self, key: str) -> Optional[int]:
+        """Retrieve data as an integer from Redis
+        Args:
+            key: The key of the data to retrieve
+        Return:
+            The retrieve data as an integer or None if it does not exist
+        """
+        return self.get(key, lambda x: int(x))
