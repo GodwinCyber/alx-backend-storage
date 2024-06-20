@@ -107,7 +107,6 @@ class Cache:
         redis_store = getattr(fn.__self__, '_redis', None)
         if not isinstance(redis_store, redis.Redis):
             return
-        
         fxn_name = fn.__qualname__
         in_key = '{}:inputs'.format(fxn_name)
         out_key = '{}:outputs'.format(fxn_name)
